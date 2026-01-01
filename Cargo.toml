@@ -11,3 +11,6 @@ fs2 = "0.4.3"
 image = "0.25"
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }
 raw-window-handle = "0.6"
+
+[build-dependencies]
+winres = "0.1"
