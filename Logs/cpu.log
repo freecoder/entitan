@@ -1,6 +1,0 @@
-1/1 14:16:03.266  vendor: GenuineIntel
-1/1 14:16:03.266  branding: Intel(R) Core(TM) i9-10900K CPU @ 3.70GHz
-1/1 14:16:03.266  features: lahf64 cmpxchg16b sse sse2 sse3 ssse3 sse41 sse42 avx avx2 aesni clmul rdrand 
-1/1 14:16:03.266  sockets: 1
-1/1 14:16:03.266  cores: 10
-1/1 14:16:03.266  threads: 20
