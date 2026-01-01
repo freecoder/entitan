@@ -1,0 +1,13 @@
+[package]
+name = "entitan"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+eframe = "0.33"
+rfd = "0.16"
+notify = "8"
+fs2 = "0.4.3"
+image = "0.25"
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }
+raw-window-handle = "0.6"
