@@ -1,4 +1,4 @@
-[![Release](https://github.com/freecoder/entitan/actions/workflows/release.yml/badge.svg)](https://github.com/freecoder/entitan/actions/workflows/release.yml)
+[![Windows Release](https://github.com/freecoder/entitan/actions/workflows/release-windows.yml/badge.svg)](https://github.com/freecoder/entitan/actions/workflows/release-windows.yml)
 
 # enTitan — A utility to launch World of Warcaft Titan Reforged with custom locale (enUS)
 
