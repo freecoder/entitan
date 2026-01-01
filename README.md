@@ -35,3 +35,7 @@ See LICENSE file for details.
 ## AI Disclosure
 
 This utility was developed using agentic AI in Visual Studio Code with Raptor Mini (Preview).  
+
+## Credits
+
+<a href="https://www.flaticon.com/free-icons/document" title="document icons">Document icons created by Arkinasi - Flaticon</a>
