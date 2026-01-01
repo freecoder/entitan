@@ -51,10 +51,15 @@ jobs:
     needs: build-windows
     runs-on: ubuntu-latest
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - name: Download build artifact
+        uses: actions/download-artifact@v5
         with:
+          name: entitan-windows
           path: artifacts
+
+      - name: List downloaded artifacts (for verification)
+        run: |
+          echo "Artifacts dir contents:" && ls -R artifacts || true
 
       - name: Create GitHub release and upload assets
         uses: ncipollo/release-action@v1
@@ -62,3 +67,4 @@ jobs:
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           artifacts: artifacts/entitan-windows-*.zip
+          artifactErrorsFailBuild: true
