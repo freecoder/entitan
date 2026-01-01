@@ -25,3 +25,11 @@ Pressing "Run" will
 ## Screenshot
 
   ![Example screenshot](Example.png)
+
+## License
+
+See LICENSE file for details.
+
+## AI Disclosure
+
+This utility was developed using agentic AI in Visual Studio Code with Raptor Mini (Preview).  
