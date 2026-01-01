@@ -1,12 +1,23 @@
-# Entitan — egui example
+# enTitan — A utility to launch World of Warcaft Titan Reforged with custom locale (enUS)
 
-A minimal Rust binary using `eframe` (egui) to show a button and counter.
+## Configuration
 
-Quick start:
+- Launch the application
+- Set the desired locale (enUS for English). Press update.
+- Set the path to your Battle.net launcher.
+- Set the path to your World of Warcraft Titan Reforged *Config.wtf* file in the WTF folder.
+- Set the path to your World of Warcraft binary (not launcher)
 
-- Build and run: `cargo run`
+## Running
 
-Notes:
+Pressing "Run" will
 
-- This example uses `eframe` (egui) and `rfd` for file dialogs and is cross-platform. The app requests a minimum window size from the backend when available and also applies a UI-level fallback if unsupported.
-- Press the "Increment" button in the app window to increase the counter.
+- Launch Battle.net 
+- Wait 10 seconds
+
+- Launch World of Warcraft Titan Reforged directly (should come up in the correct locale) - do not login!
+- Wait 60 seconds
+
+- Launch Battle.net again to bring it to the foreground
+  - You now press "Play" to launch the game properly (hopefully in English)
+  - You can now manually close the original World of Warcraft
