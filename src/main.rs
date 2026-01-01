@@ -6,6 +6,11 @@ use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
+// Embedded default background: compiled from `background.png` at the repository root.
+// This file is included at compile time using `include_bytes!`, causing a rebuild when the image changes.
+const DEFAULT_BACKGROUND_PNG: &[u8] =
+    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/background.png"));
+
 // The two entries in Config.wtf that set game language
 // SET audioLocale "enUS"
 // SET textLocale "enUS"
@@ -266,48 +271,65 @@ impl EntitanApp {
 impl eframe::App for EntitanApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
-            // Try to load background.png once (from current working directory)
+            // Try to load background.png once (from current working directory). If not present or fails, use embedded default.
             if !self.background_load_attempted && self.background_texture.is_none() {
                 self.background_load_attempted = true;
+                let mut img_opt: Option<image::DynamicImage> = None;
+
+                // Prefer an external background.png if present (allows overrides without recompiling)
                 let bg_path = std::env::current_dir()
                     .unwrap_or_else(|_| PathBuf::from("."))
                     .join("background.png");
                 if bg_path.exists() {
                     match image::open(&bg_path) {
                         Ok(img) => {
-                            // convert to RGBA8 and then to grayscale with 10% opacity
-                            let img = img.to_rgba8();
-                            let w = img.width() as usize;
-                            let h = img.height() as usize;
-                            let mut pixels = img.into_vec();
-                            for chunk in pixels.chunks_exact_mut(4) {
-                                let r = chunk[0] as f32;
-                                let g = chunk[1] as f32;
-                                let b = chunk[2] as f32;
-                                let a = chunk[3];
-                                // luminance per Rec. 601
-                                let lum = (0.299 * r + 0.587 * g + 0.114 * b).round() as u8;
-                                chunk[0] = lum;
-                                chunk[1] = lum;
-                                chunk[2] = lum;
-                                // set opacity to 10% of original
-                                chunk[3] = ((a as f32) * 0.1).round() as u8;
-                            }
-                            let size = [w, h];
-                            let color_image =
-                                egui::ColorImage::from_rgba_unmultiplied(size, &pixels);
-                            let tex = ctx.load_texture(
-                                "background",
-                                color_image,
-                                egui::TextureOptions::LINEAR,
-                            );
-                            self.background_texture = Some(tex);
-                            self.background_size = Some([w, h]);
+                            img_opt = Some(img);
                         }
                         Err(e) => {
                             self.status = Some(format!("Failed to load background.png: {}", e));
                         }
                     }
+                }
+
+                // If no external image found, load embedded default
+                if img_opt.is_none() {
+                    match image::load_from_memory(DEFAULT_BACKGROUND_PNG) {
+                        Ok(img) => {
+                            img_opt = Some(img);
+                            self.status = Some("Using embedded default background image".into());
+                        }
+                        Err(e) => {
+                            self.status =
+                                Some(format!("Failed to decode embedded background image: {}", e));
+                        }
+                    }
+                }
+
+                if let Some(img) = img_opt {
+                    // convert to RGBA8 and then to grayscale with 10% opacity
+                    let img = img.to_rgba8();
+                    let w = img.width() as usize;
+                    let h = img.height() as usize;
+                    let mut pixels = img.into_vec();
+                    for chunk in pixels.chunks_exact_mut(4) {
+                        let r = chunk[0] as f32;
+                        let g = chunk[1] as f32;
+                        let b = chunk[2] as f32;
+                        let a = chunk[3];
+                        // luminance per Rec. 601
+                        let lum = (0.299 * r + 0.587 * g + 0.114 * b).round() as u8;
+                        chunk[0] = lum;
+                        chunk[1] = lum;
+                        chunk[2] = lum;
+                        // set opacity to 10% of original
+                        chunk[3] = ((a as f32) * 0.1).round() as u8;
+                    }
+                    let size = [w, h];
+                    let color_image = egui::ColorImage::from_rgba_unmultiplied(size, &pixels);
+                    let tex =
+                        ctx.load_texture("background", color_image, egui::TextureOptions::LINEAR);
+                    self.background_texture = Some(tex);
+                    self.background_size = Some([w, h]);
                 }
             }
 
