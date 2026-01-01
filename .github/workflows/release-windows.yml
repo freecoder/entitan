@@ -1,64 +1,64 @@
 name: Build and Release Windows Binary
 
 on:
-  push:
-    tags:
-      - 'v*'
+    push:
+        tags:
+            - "v*"
 
 permissions:
-  contents: write
+    contents: write
 
 jobs:
-  build-windows:
-    name: Build (Windows)
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    build-windows:
+        name: Build (Windows)
+        runs-on: windows-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
 
-      - name: Install Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
+            - name: Install Rust toolchain
+              uses: actions-rs/toolchain@v1
+              with:
+                  toolchain: stable
+                  override: true
 
-      - name: Cache cargo
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+            - name: Cache cargo
+              uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.cargo/registry
+                      ~/.cargo/git
+                      target
+                  key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-cargo-
 
-      - name: Build release
-        run: cargo build --release
+            - name: Build release
+              run: cargo build --release
 
-      - name: Package for Windows
-        run: |
-          powershell -Command "Compress-Archive -Path target\release\entitan.exe -DestinationPath entitan-windows-${{ github.ref_name }}.zip"
+            - name: Package for Windows
+              run: |
+                  powershell -Command "Compress-Archive -Path target\release\entitan.exe -DestinationPath entitan-windows-${{ github.ref_name }}.zip"
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: entitan-windows
-          path: entitan-windows-*.zip
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: entitan-windows
+                  path: entitan-windows-*.zip
 
-  release:
-    name: Create GitHub release and upload Windows artifact
-    needs: build-windows
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
+    release:
+        name: Create GitHub release and upload Windows artifact
+        needs: build-windows
+        runs-on: ubuntu-latest
+        steps:
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  path: artifacts
 
-      - name: Create GitHub release and upload assets
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          files: artifacts/*
+            - name: Create GitHub release and upload assets
+              uses: ncipollo/release-action@v1
+              with:
+                  tag: ${{ github.ref_name }}
+                  name: Release ${{ github.ref_name }}
+                  files: artifacts/*
