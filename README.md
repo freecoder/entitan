@@ -21,3 +21,7 @@ Pressing "Run" will
 - Launch Battle.net again to bring it to the foreground
   - You now press "Play" to launch the game properly (hopefully in English)
   - You can now manually close the original World of Warcraft
+
+## Screenshot
+
+  ![Example screenshot](Example.png)
