@@ -2,6 +2,10 @@
 
 # enTitan — A utility to launch World of Warcaft Titan Reforged with custom locale (enUS)
 
+## Disclaimer
+
+This utility is unsupported.  It is for personal use only.  If you can use it, please feel free.  But there is no support or ongoing maintenance for it.
+
 ## Configuration
 
 - Launch the application
