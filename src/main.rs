@@ -653,12 +653,15 @@ impl eframe::App for EntitanApp {
                                 sleep(Duration::from_secs(1));
                             }
 
-                            if let Err(e) = Command::new(&wow_path).spawn() {
-                                let _ = tx.send(format!("Failed to launch WoW: {}", e));
-                                let _ = tx.send("FINISHED".into());
-                                return;
-                            } else {
-                                let _ = tx.send("Launched WoW".into());
+                            match Command::new(&wow_path).spawn() {
+                                Ok(_child) => {
+                                    let _ = tx.send("Launched WoW".into());
+                                }
+                                Err(e) => {
+                                    let _ = tx.send(format!("Failed to launch WoW: {}", e));
+                                    let _ = tx.send("FINISHED".into());
+                                    return;
+                                }
                             }
 
                             // 60-second countdown with per-second updates
