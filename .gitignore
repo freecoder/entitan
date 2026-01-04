@@ -1,1 +1,4 @@
 /target
+
+# Ignore runtime logs
+Logs/
