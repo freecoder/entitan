@@ -43,3 +43,9 @@ This utility was developed using agentic AI in Visual Studio Code with Raptor Mi
 ## Credits
 
 <a href="https://www.flaticon.com/free-icons/document" title="document icons">Document icons created by Arkinasi - Flaticon</a>
+
+<a href="https://www.youtube.com/watch?v=MnO_lF2elmU" title="Guide">Guide on running Titan Reforged in English</a>
+
+<a href="https://www.reddit.com/r/TitanReforged/" title="Guide">Titan Reforged on Reddit</a>
+
+
