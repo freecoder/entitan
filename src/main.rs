@@ -8,7 +8,6 @@ use notify::{RecommendedWatcher, RecursiveMode, Watcher, recommended_watcher};
 use rfd::FileDialog;
 use std::env;
 use std::fs;
-use std::io::Write;
 use std::path::{Path, PathBuf};
 
 // Embedded default background: compiled from `background.png` at the repository root.
@@ -813,19 +812,21 @@ impl eframe::App for EntitanApp {
 }
 
 fn settings_file_path() -> Option<PathBuf> {
+    // Use JSON filename from now on
+    let fname = "settings.json";
     if cfg!(target_os = "windows") {
         env::var("APPDATA")
             .ok()
-            .map(|a| PathBuf::from(a).join("entitan").join("settings.txt"))
+            .map(|a| PathBuf::from(a).join("entitan").join(fname))
     } else {
         if let Ok(xdg) = env::var("XDG_CONFIG_HOME") {
-            Some(PathBuf::from(xdg).join("entitan").join("settings.txt"))
+            Some(PathBuf::from(xdg).join("entitan").join(fname))
         } else if let Ok(home) = env::var("HOME") {
             Some(
                 PathBuf::from(home)
                     .join(".config")
                     .join("entitan")
-                    .join("settings.txt"),
+                    .join(fname),
             )
         } else {
             None
@@ -833,7 +834,28 @@ fn settings_file_path() -> Option<PathBuf> {
     }
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+struct SettingsFile {
+    #[serde(rename = "launcher", alias = "battle")]
+    launcher: String,
+    config: String,
+    #[serde(rename = "wowExecutable", alias = "wow")]
+    wow_executable: String,
+    #[serde(rename = "preferredLocale")]
+    preferred_locale: String,
+    geometry: Option<Geometry>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct Geometry {
+    x: i32,
+    y: i32,
+    w: f32,
+    h: f32,
+}
+
 // Loads battle, config, wow, preferred locale and optional geometry (x,y,w,h)
+// Reads settings exclusively from `settings.json`.
 fn load_settings_full() -> (String, String, String, String, Option<(i32, i32, f32, f32)>) {
     let path = match settings_file_path() {
         Some(p) => p,
@@ -847,50 +869,29 @@ fn load_settings_full() -> (String, String, String, String, Option<(i32, i32, f3
             );
         }
     };
+
     if path.exists() {
-        if let Ok(contents) = fs::read_to_string(path) {
-            let mut lines = contents.lines();
-            let battle = lines.next().unwrap_or("").trim().to_string();
-            let config = lines.next().unwrap_or("").trim().to_string();
-            let wow = lines.next().unwrap_or("").trim().to_string();
-            let preferred = lines.next().unwrap_or("enUS").trim().to_string();
-            let geom = lines.next().and_then(|s| {
-                let s = s.trim();
-                if s.is_empty() {
-                    return None;
-                }
-                let parts: Vec<&str> = s.split(',').collect();
-                if parts.len() == 4 {
-                    if let (Ok(x), Ok(y), Ok(w), Ok(h)) = (
-                        parts[0].parse::<i32>(),
-                        parts[1].parse::<i32>(),
-                        parts[2].parse::<f32>(),
-                        parts[3].parse::<f32>(),
-                    ) {
-                        return Some((x, y, w, h));
-                    }
-                }
-                None
-            });
-            (battle, config, wow, preferred, geom)
-        } else {
-            (
-                String::new(),
-                String::new(),
-                String::new(),
-                String::new(),
-                None,
-            )
+        if let Ok(contents) = fs::read_to_string(&path) {
+            if let Ok(s) = serde_json::from_str::<SettingsFile>(&contents) {
+                let geom = s.geometry.map(|g| (g.x, g.y, g.w, g.h));
+                return (
+                    s.launcher,
+                    s.config,
+                    s.wow_executable,
+                    s.preferred_locale,
+                    geom,
+                );
+            }
         }
-    } else {
-        (
-            String::new(),
-            String::new(),
-            String::new(),
-            String::new(),
-            None,
-        )
     }
+
+    (
+        String::new(),
+        String::new(),
+        String::new(),
+        String::new(),
+        None,
+    )
 }
 
 fn save_settings(
@@ -907,13 +908,20 @@ fn save_settings(
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
+
+    let settings = SettingsFile {
+        launcher: battle.to_string(),
+        config: config.to_string(),
+        wow_executable: wow.to_string(),
+        preferred_locale: preferred.to_string(),
+        geometry: match (position, size) {
+            (Some((x, y)), Some((w, h))) => Some(Geometry { x, y, w, h }),
+            _ => None,
+        },
+    };
+
     let mut file = fs::File::create(path)?;
-    write!(file, "{}\n{}\n{}\n{}\n", battle, config, wow, preferred)?;
-    if let (Some((x, y)), Some((w, h))) = (position, size) {
-        write!(file, "{},{},{},{}\n", x, y, w, h)?;
-    } else {
-        write!(file, "\n")?;
-    }
+    serde_json::to_writer_pretty(&mut file, &settings)?;
     Ok(())
 }
 
