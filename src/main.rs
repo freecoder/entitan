@@ -69,9 +69,15 @@ fn main() {
     // Use ViewportBuilder but make sure to set min_inner_size on the builder so it isn't lost
     let mut vp_builder = egui::viewport::ViewportBuilder::default().with_min_inner_size(min_size);
     if let Some((x, y, w, h)) = geom {
+        // Clamp loaded window size to the minimum to avoid creating too-small windows
+        let clamped_w = w.max(min_size.x);
+        let clamped_h = h.max(min_size.y);
+        // Clamp loaded position to be non-negative so the window isn't placed off-screen
+        let clamped_x = x.max(0) as f32;
+        let clamped_y = y.max(0) as f32;
         vp_builder = vp_builder
-            .with_inner_size(egui::vec2(w, h))
-            .with_position(egui::pos2(x as f32, y as f32));
+            .with_inner_size(egui::vec2(clamped_w, clamped_h))
+            .with_position(egui::pos2(clamped_x, clamped_y));
     } else {
         vp_builder = vp_builder.with_inner_size(default_size);
     }
