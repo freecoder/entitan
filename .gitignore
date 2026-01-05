@@ -1,4 +1,3 @@
+entitan.code-workspace
 /target
-
-# Ignore runtime logs
 Logs/
